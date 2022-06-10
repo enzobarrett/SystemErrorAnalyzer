@@ -364,7 +364,7 @@ You may or may not need anything in your constructor or destructor. For now at l
 empty. At the time we’re constructed, we really have no idea what the settings are or anything else, so there’s not much we can do at this point.
 
 **void {YourName}SimulationDataGenerator::Initialize( U32 simulation_sample_rate,**
-**{YourName}AnalyzerSettings* settings )**
+**{YourName}AnalyzerSettings\* settings )**
 
 This function provides you with the state of things as they are going to be when we start simulating.
 We’ll need to save this information.
