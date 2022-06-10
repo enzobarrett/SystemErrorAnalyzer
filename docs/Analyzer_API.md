@@ -240,7 +240,7 @@ After assigning the interface values to your settings variables, you also need t
 
 ***void {YourName}AnalyzerSettings::LoadSettings( const char* settings )***
 
-In the last to functions of your AnalyzerSettings-derived class, you’ll implement serialization
+In the last two functions of your AnalyzerSettings-derived class, you’ll implement serialization
 (persistence) of your settings. It’s pretty straightforward.
 
 Your settings are saved in, and loaded from, a single string. You can technically serialize all of your
