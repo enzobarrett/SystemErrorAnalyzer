@@ -3,69 +3,66 @@
 
 #include <AnalyzerHelpers.h>
 
-SystemErrorSimulationDataGenerator::SystemErrorSimulationDataGenerator()
-:	mSerialText( "My first analyzer, woo hoo!" ),
-	mStringIndex( 0 )
-{
-}
+SystemErrorSimulationDataGenerator::SystemErrorSimulationDataGenerator() {}
 
-SystemErrorSimulationDataGenerator::~SystemErrorSimulationDataGenerator()
-{
-}
+SystemErrorSimulationDataGenerator::~SystemErrorSimulationDataGenerator() {}
 
 void SystemErrorSimulationDataGenerator::Initialize( U32 simulation_sample_rate, SystemErrorAnalyzerSettings* settings )
 {
-	mSimulationSampleRateHz = simulation_sample_rate;
-	mSettings = settings;
+	m_SimulationSampleRateHz = simulation_sample_rate;
+	m_Settings = settings;
+    m_ErrorCode = 42; // InvalidController
+    m_Clock = ClockGenerator();
 
-	mSerialSimulationData.SetChannel( mSettings->m_InputChannel );
-	mSerialSimulationData.SetSampleRate( simulation_sample_rate );
-	mSerialSimulationData.SetInitialBitState( BIT_HIGH );
+	m_SerialSimulationData.SetChannel( m_Settings->m_InputChannel );
+	m_SerialSimulationData.SetSampleRate( simulation_sample_rate );
+	m_SerialSimulationData.SetInitialBitState( BIT_HIGH );
 }
 
 U32 SystemErrorSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_requested, U32 sample_rate, SimulationChannelDescriptor** simulation_channel )
 {
-	U64 adjusted_largest_sample_requested = AnalyzerHelpers::AdjustSimulationTargetSample( largest_sample_requested, sample_rate, mSimulationSampleRateHz );
+	U64 adjusted_largest_sample_requested = AnalyzerHelpers::AdjustSimulationTargetSample( largest_sample_requested, sample_rate, m_SimulationSampleRateHz );
 
-	while( mSerialSimulationData.GetCurrentSampleNumber() < adjusted_largest_sample_requested )
+	while( m_SerialSimulationData.GetCurrentSampleNumber() < adjusted_largest_sample_requested )
 	{
-		CreateSerialByte();
+		CreatePeriod();
 	}
 
-	*simulation_channel = &mSerialSimulationData;
+	*simulation_channel = &m_SerialSimulationData;
 	return 1;
 }
 
-void SystemErrorSimulationDataGenerator::CreateSerialByte()
+void SystemErrorSimulationDataGenerator::CreatePeriod()
 {
-	U32 samples_per_bit = mSimulationSampleRateHz / mSettings->m_10sFreq;
+    // display 10s digit
+    PulseDigit(m_ErrorCode / 10, m_Settings->m_10sFreq);
 
-	U8 byte = mSerialText[ mStringIndex ];
-	mStringIndex++;
-	if( mStringIndex == mSerialText.size() )
-		mStringIndex = 0;
+    // delay padding 1
+    m_SerialSimulationData.Advance(m_Clock.AdvanceByTimeS((double) m_Settings->m_Padding1 / 1000 ));
 
-	//we're currenty high
-	//let's move forward a little
-	mSerialSimulationData.Advance( samples_per_bit * 10 );
+    // display 1s digit
+    PulseDigit(m_ErrorCode % 10, m_Settings->m_1sFreq);
 
-	mSerialSimulationData.Transition();  //low-going edge for start bit
-	mSerialSimulationData.Advance( samples_per_bit );  //add start bit time
+    // delay padding 2
+    m_SerialSimulationData.Advance(m_Clock.AdvanceByTimeS((double) m_Settings->m_Padding2 / 1000 ));
+}
 
-	U8 mask = 0x1 << 7;
-	for( U32 i=0; i<8; i++ )
-	{
-		if( ( byte & mask ) != 0 )
-			mSerialSimulationData.TransitionIfNeeded( BIT_HIGH );
-		else
-			mSerialSimulationData.TransitionIfNeeded( BIT_LOW );
+void SystemErrorSimulationDataGenerator::PulseDigit(int digit, int freq) {
+    // init clock
+    m_Clock.Init(freq, m_SimulationSampleRateHz);
 
-		mSerialSimulationData.Advance( samples_per_bit );
-		mask = mask >> 1;
-	}
+    // loop through the digit and pulse
+    for (int i = 0; i < digit; ++i) {
+        // pull the line low
+        m_SerialSimulationData.TransitionIfNeeded( BIT_LOW );
 
-	mSerialSimulationData.TransitionIfNeeded( BIT_HIGH ); //we need to end high
+        // advance half period
+        m_SerialSimulationData.Advance(m_Clock.AdvanceByHalfPeriod());
 
-	//lets pad the end a bit for the stop bit:
-	mSerialSimulationData.Advance( samples_per_bit );
+        // high again
+        m_SerialSimulationData.TransitionIfNeeded( BIT_HIGH );
+
+        // advance half period
+        m_SerialSimulationData.Advance(m_Clock.AdvanceByHalfPeriod());
+    }
 }

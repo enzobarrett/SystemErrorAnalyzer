@@ -2,7 +2,9 @@
 #define SYSTEMERROR_SIMULATION_DATA_GENERATOR
 
 #include <SimulationChannelDescriptor.h>
+#include <AnalyzerHelpers.h>
 #include <string>
+
 class SystemErrorAnalyzerSettings;
 
 class SystemErrorSimulationDataGenerator
@@ -15,15 +17,19 @@ public:
 	U32 GenerateSimulationData( U64 newest_sample_requested, U32 sample_rate, SimulationChannelDescriptor** simulation_channel );
 
 protected:
-	SystemErrorAnalyzerSettings* mSettings;
-	U32 mSimulationSampleRateHz;
+	SystemErrorAnalyzerSettings* m_Settings;
+	U32 m_SimulationSampleRateHz;
 
 protected:
-	void CreateSerialByte();
-	std::string mSerialText;
-	U32 mStringIndex;
+    // create the data for one error display
+	void CreatePeriod();
 
-	SimulationChannelDescriptor mSerialSimulationData;
+    // display a digit at hz
+    void PulseDigit(int digit, int freq);
 
+	SimulationChannelDescriptor m_SerialSimulationData;
+	ClockGenerator m_Clock;
+
+    int m_ErrorCode;
 };
 #endif //SYSTEMERROR_SIMULATION_DATA_GENERATOR
