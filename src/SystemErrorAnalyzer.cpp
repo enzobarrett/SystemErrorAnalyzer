@@ -19,20 +19,20 @@ void SystemErrorAnalyzer::SetupResults()
 {
 	mResults.reset( new SystemErrorAnalyzerResults( this, mSettings.get() ) );
 	SetAnalyzerResults( mResults.get() );
-	mResults->AddChannelBubblesWillAppearOn( mSettings->mInputChannel );
+	mResults->AddChannelBubblesWillAppearOn( mSettings->m_InputChannel );
 }
 
 void SystemErrorAnalyzer::WorkerThread()
 {
 	mSampleRateHz = GetSampleRate();
 
-	mSerial = GetAnalyzerChannelData( mSettings->mInputChannel );
+	mSerial = GetAnalyzerChannelData( mSettings->m_InputChannel );
 
 	if( mSerial->GetBitState() == BIT_LOW )
 		mSerial->AdvanceToNextEdge();
 
-	U32 samples_per_bit = mSampleRateHz / mSettings->mBitRate;
-	U32 samples_to_first_center_of_first_data_bit = U32( 1.5 * double( mSampleRateHz ) / double( mSettings->mBitRate ) );
+	U32 samples_per_bit = mSampleRateHz / mSettings->m_10sFreq;
+	U32 samples_to_first_center_of_first_data_bit = U32( 1.5 * double( mSampleRateHz ) / double( mSettings->m_10sFreq ) );
 
 	for( ; ; )
 	{
@@ -48,7 +48,7 @@ void SystemErrorAnalyzer::WorkerThread()
 		for( U32 i=0; i<8; i++ )
 		{
 			//let's put a dot exactly where we sample this bit:
-			mResults->AddMarker( mSerial->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel );
+			mResults->AddMarker( mSerial->GetSampleNumber(), AnalyzerResults::Dot, mSettings->m_InputChannel );
 
 			if( mSerial->GetBitState() == BIT_HIGH )
 				data |= mask;
@@ -90,7 +90,7 @@ U32 SystemErrorAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 d
 
 U32 SystemErrorAnalyzer::GetMinimumSampleRateHz()
 {
-	return mSettings->mBitRate * 4;
+	return mSettings->m_10sFreq * 4;
 }
 
 const char* SystemErrorAnalyzer::GetAnalyzerName() const

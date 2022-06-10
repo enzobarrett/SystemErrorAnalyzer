@@ -18,7 +18,7 @@ void SystemErrorSimulationDataGenerator::Initialize( U32 simulation_sample_rate,
 	mSimulationSampleRateHz = simulation_sample_rate;
 	mSettings = settings;
 
-	mSerialSimulationData.SetChannel( mSettings->mInputChannel );
+	mSerialSimulationData.SetChannel( mSettings->m_InputChannel );
 	mSerialSimulationData.SetSampleRate( simulation_sample_rate );
 	mSerialSimulationData.SetInitialBitState( BIT_HIGH );
 }
@@ -38,7 +38,7 @@ U32 SystemErrorSimulationDataGenerator::GenerateSimulationData( U64 largest_samp
 
 void SystemErrorSimulationDataGenerator::CreateSerialByte()
 {
-	U32 samples_per_bit = mSimulationSampleRateHz / mSettings->mBitRate;
+	U32 samples_per_bit = mSimulationSampleRateHz / mSettings->m_10sFreq;
 
 	U8 byte = mSerialText[ mStringIndex ];
 	mStringIndex++;
