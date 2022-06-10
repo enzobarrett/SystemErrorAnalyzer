@@ -70,12 +70,12 @@ In addition, your header will define two sets of variables:
 
 This will always include at least one variable of the type *Channel* – so the user can specify which input channel to use. This cannot be hard coded, and must be exposed as a setting. ( *Channel* isn’t just an index, it also specifies which Logic device the channel is from). Other possible settings depend on your protocol, and might include:
 
--  Bit rate
--  Bits per transfer
--  Bit ordering (MSb first, LSb first)
--  Clock edge (rising, falling) to use
--  Enable line polarity
--  Etc – anything you need for your specific protocol. If you like, start with just the Channel variable(s), and you can add more later to make your analyzer more flexible.
+- Bit rate
+- Bits per transfer
+- Bit ordering (MSb first, LSb first)
+- Clock edge (rising, falling) to use
+- Enable line polarity
+- Etc – anything you need for your specific protocol. If you like, start with just the Channel variable(s), and you can add more later to make your analyzer more flexible.
 
 The variable types can be whatever you like – *std::string*, *double*, *int*, *enum*, etc. Note that these
 variables will need to be serialized (saved for later, to a file) so when in doubt, stick to simple types
@@ -86,11 +86,11 @@ variables will need to be serialized (saved for later, to a file) so when in dou
 One of the services the Analyzer SDK provides is a means for users to edit your settings, with a GUI, with minimal work on your part. To make this possible, each of your settings variables must have a corresponding interface object. Here are the available *AnalyzerSettingsInterface* types:
 
 
--  AnalyzerSettingInterfaceChannel: Used exclusively for input channel selection.
--  AnalyzerSettingInterfaceNumberList: Used to provide a list of numerical options for the user to choose from. Note that this can be used to select from several enum types as well, as illustrated below. (Each dropdown below is implemented with its own interface object)
--  AnalyzerSettingInterfaceInteger: Allows a user to type an integer into a box.
--  AnalyzerSettingInterfaceText: Allows a user to enter some text into a textbox.
--  AnalyzerSettingInterfaceBool: Provides the user with a checkbox.
+- AnalyzerSettingInterfaceChannel: Used exclusively for input channel selection.
+- AnalyzerSettingInterfaceNumberList: Used to provide a list of numerical options for the user to choose from. Note that this can be used to select from several enum types as well, as illustrated below. (Each dropdown below is implemented with its own interface object)
+- AnalyzerSettingInterfaceInteger: Allows a user to type an integer into a box.
+- AnalyzerSettingInterfaceText: Allows a user to enter some text into a textbox.
+- AnalyzerSettingInterfaceBool: Provides the user with a checkbox.
 
 *AnalyzerSettingsInterface* types should be declared as pointers. (We’re using the *std::auto_ptr* type,
 which largely acts like a standard (raw) pointer. It’s a simple form of what’s called a “smart pointer” and it automatically calls *delete* on its contents when it goes out of scope.)
@@ -402,12 +402,12 @@ The initial bit state of the channel never changes. The state (high or low) of a
 
 Put another way:
 
--  In the very beginning, we specify the initial state (BIT_LOW or BIT_HIGH). This is the state of Sample Number 0.
--  Then, we move forward (advance) some number of samples. 20 samples, for example.
--  Then, we toggle the channel (low becomes high, high becomes low).
--  Then we move forward (advance) some more. Maybe 100 samples this time.
--  Then we toggle again.
--  Then we move forward again, and then we toggle again, etc.
+- In the very beginning, we specify the initial state (BIT_LOW or BIT_HIGH). This is the state of Sample Number 0.
+- Then, we move forward (advance) some number of samples. 20 samples, for example.
+- Then, we toggle the channel (low becomes high, high becomes low).
+- Then we move forward (advance) some more. Maybe 100 samples this time.
+- Then we toggle again.
+- Then we move forward again, and then we toggle again, etc.
 
 Let’s explore the functions used to do this:
 
@@ -1304,10 +1304,10 @@ Now let’s discus how to store results.
 We described *Frames* when talking about the *AnalyzerResults* - derived class. A *Frame* is the basic unit results are saved in. *Frames* have:
 
 
--  starting and ending time (starting and ending sample number),
--  x2 64-bit values to save results in
--  an 8-bit type variable – to specify the type of Frame
--  an 8-bit flags variable – to specify Yes/No types of results.
+- starting and ending time (starting and ending sample number),
+- x2 64-bit values to save results in
+- an 8-bit type variable – to specify the type of Frame
+- an 8-bit flags variable – to specify Yes/No types of results.
 
 When we have analyzed far enough, and now have a complete *Frame* we would like to record, we do it like this:
 
@@ -1330,9 +1330,9 @@ When we have analyzed far enough, and now have a complete *Frame* we would like 
 First we make a *Frame* on the stack. Then we fill in all its values. If there’s a value you don’t need, to save time you can skip setting it. *mFlags* should always be set to zero, however, because certain pre-defined flags will cause the results bubble to indicate a warning or error ( *DISPLAY_AS_WARNING_FLAG*, and *DISPLAY_AS_ERROR_FLAG* ).
 Part of the *Frame* is expected to be filled in correctly because it’s used automatically by other systems. In particular,
 
--  mStartingSampleInclusive
--  mEndingSampleInclusive
--  mFlags
+- mStartingSampleInclusive
+- mEndingSampleInclusive
+- mFlags
 
 should be filled in properly.
 
@@ -1391,13 +1391,13 @@ The analyzers created by Saleae do not yet use *Transactions* , and the current 
 
 *Packets* on the other hand tend to be fairly applicable for lower level protocols, although not in entirely the same ways. For example:
 
--  Serial Analyzer – no packet support makes sense at this level. (there are many more structured protocols that use asynchronous serial where packets would be applicable)
--  SPI Analyzer – packets are used to delimit between periods when the enable line is active.
--  I2C Analyzer – packets are used to delimit periods between a start/restart and a stop.
--  CAN Analyzer – packets are used to represent, well, CAN packets.
--  UNI/O – packets are used to group Frames in a UNI/O sequence.
--  1 - Wire – packets are used to group 1-Wire sequences.
--  I2S/PCM – packets aren’t used.
+- Serial Analyzer – no packet support makes sense at this level. (there are many more structured protocols that use asynchronous serial where packets would be applicable)
+- SPI Analyzer – packets are used to delimit between periods when the enable line is active.
+- I2C Analyzer – packets are used to delimit periods between a start/restart and a stop.
+- CAN Analyzer – packets are used to represent, well, CAN packets.
+- UNI/O – packets are used to group Frames in a UNI/O sequence.
+- 1 - Wire – packets are used to group 1-Wire sequences.
+- I2S/PCM – packets aren’t used.
 
 Currently, *Packets* are only used when exporting data to text/csv. In the future, analyzer tabular views will support nesting *Frames* into *Packets* , and identifying *Transactions* (ids) associated with particular *Packets*. Generating the textual content to support this is provided in your *AnalyzerResults* - derived class.
 
