@@ -1,28 +1,28 @@
-#include "SimpleSerialAnalyzer.h"
-#include "SimpleSerialAnalyzerSettings.h"
+#include "SystemErrorAnalyzer.h"
+#include "SystemErrorAnalyzerSettings.h"
 #include <AnalyzerChannelData.h>
 
-SimpleSerialAnalyzer::SimpleSerialAnalyzer()
+SystemErrorAnalyzer::SystemErrorAnalyzer()
 :	Analyzer2(),  
-	mSettings( new SimpleSerialAnalyzerSettings() ),
+	mSettings( new SystemErrorAnalyzerSettings() ),
 	mSimulationInitilized( false )
 {
 	SetAnalyzerSettings( mSettings.get() );
 }
 
-SimpleSerialAnalyzer::~SimpleSerialAnalyzer()
+SystemErrorAnalyzer::~SystemErrorAnalyzer()
 {
 	KillThread();
 }
 
-void SimpleSerialAnalyzer::SetupResults()
+void SystemErrorAnalyzer::SetupResults()
 {
-	mResults.reset( new SimpleSerialAnalyzerResults( this, mSettings.get() ) );
+	mResults.reset( new SystemErrorAnalyzerResults( this, mSettings.get() ) );
 	SetAnalyzerResults( mResults.get() );
 	mResults->AddChannelBubblesWillAppearOn( mSettings->mInputChannel );
 }
 
-void SimpleSerialAnalyzer::WorkerThread()
+void SystemErrorAnalyzer::WorkerThread()
 {
 	mSampleRateHz = GetSampleRate();
 
@@ -72,12 +72,12 @@ void SimpleSerialAnalyzer::WorkerThread()
 	}
 }
 
-bool SimpleSerialAnalyzer::NeedsRerun()
+bool SystemErrorAnalyzer::NeedsRerun()
 {
 	return false;
 }
 
-U32 SimpleSerialAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate, SimulationChannelDescriptor** simulation_channels )
+U32 SystemErrorAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate, SimulationChannelDescriptor** simulation_channels )
 {
 	if( mSimulationInitilized == false )
 	{
@@ -88,24 +88,24 @@ U32 SimpleSerialAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 
 	return mSimulationDataGenerator.GenerateSimulationData( minimum_sample_index, device_sample_rate, simulation_channels );
 }
 
-U32 SimpleSerialAnalyzer::GetMinimumSampleRateHz()
+U32 SystemErrorAnalyzer::GetMinimumSampleRateHz()
 {
 	return mSettings->mBitRate * 4;
 }
 
-const char* SimpleSerialAnalyzer::GetAnalyzerName() const
+const char* SystemErrorAnalyzer::GetAnalyzerName() const
 {
-	return "Simple Serial";
+	return "System Errorcode Analyzer";
 }
 
 const char* GetAnalyzerName()
 {
-	return "Simple Serial";
+	return "System Errorcode Analyzer";
 }
 
 Analyzer* CreateAnalyzer()
 {
-	return new SimpleSerialAnalyzer();
+	return new SystemErrorAnalyzer();
 }
 
 void DestroyAnalyzer( Analyzer* analyzer )
