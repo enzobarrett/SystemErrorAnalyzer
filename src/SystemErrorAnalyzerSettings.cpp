@@ -7,7 +7,7 @@ SystemErrorAnalyzerSettings::SystemErrorAnalyzerSettings()
 	mBitRate( 9600 )
 {
 	mInputChannelInterface.reset( new AnalyzerSettingInterfaceChannel() );
-	mInputChannelInterface->SetTitleAndTooltip( "Serial", "Standard System Errorcode Analyzer" );
+	mInputChannelInterface->SetTitleAndTooltip( "Serial", "Standard System Error Analyzer" );
 	mInputChannelInterface->SetChannel( mInputChannel );
 
 	mBitRateInterface.reset( new AnalyzerSettingInterfaceInteger() );
@@ -37,7 +37,7 @@ bool SystemErrorAnalyzerSettings::SetSettingsFromInterfaces()
 	mBitRate = mBitRateInterface->GetInteger();
 
 	ClearChannels();
-	AddChannel( mInputChannel, "System Errorcode Analyzer", true );
+	AddChannel( mInputChannel, "System Error Analyzer", true );
 
 	return true;
 }
@@ -57,7 +57,7 @@ void SystemErrorAnalyzerSettings::LoadSettings( const char* settings )
 	text_archive >> mBitRate;
 
 	ClearChannels();
-	AddChannel( mInputChannel, "System Errorcode Analyzer", true );
+	AddChannel( mInputChannel, "System Error Analyzer", true );
 
 	UpdateInterfacesFromSettings();
 }

@@ -95,12 +95,12 @@ U32 SystemErrorAnalyzer::GetMinimumSampleRateHz()
 
 const char* SystemErrorAnalyzer::GetAnalyzerName() const
 {
-	return "System Errorcode Analyzer";
+	return "System Error Analyzer";
 }
 
 const char* GetAnalyzerName()
 {
-	return "System Errorcode Analyzer";
+	return "System Error Analyzer";
 }
 
 Analyzer* CreateAnalyzer()
