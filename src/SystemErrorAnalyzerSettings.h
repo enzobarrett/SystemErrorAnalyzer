@@ -23,11 +23,11 @@ class SystemErrorAnalyzerSettings : public AnalyzerSettings
         U32 m_Padding2;
 
     protected:
-        std::auto_ptr<AnalyzerSettingInterfaceChannel> m_InputChannelInterface;
-        std::auto_ptr<AnalyzerSettingInterfaceInteger> m_10sFreqInterface;
-        std::auto_ptr<AnalyzerSettingInterfaceInteger> m_Padding1Interface;
-        std::auto_ptr<AnalyzerSettingInterfaceInteger> m_1sFreqInterface;
-        std::auto_ptr<AnalyzerSettingInterfaceInteger> m_Padding2Interface;
+        AnalyzerSettingInterfaceChannel* m_InputChannelInterface;
+        AnalyzerSettingInterfaceInteger* m_10sFreqInterface;
+        AnalyzerSettingInterfaceInteger* m_Padding1Interface;
+        AnalyzerSettingInterfaceInteger* m_1sFreqInterface;
+        AnalyzerSettingInterfaceInteger* m_Padding2Interface;
 };
 
 #endif // SYSTEMERROR_ANALYZER_SETTINGS

@@ -9,31 +9,31 @@ SystemErrorAnalyzerSettings::SystemErrorAnalyzerSettings()
     m_1sFreq(10), /* hz */
     m_Padding2(600) /* ms */
 {
-	m_InputChannelInterface.reset( new AnalyzerSettingInterfaceChannel() );
+	m_InputChannelInterface = new AnalyzerSettingInterfaceChannel();
 	m_InputChannelInterface->SetTitleAndTooltip("Input Channel", "Standard System Error Analyzer" );
 	m_InputChannelInterface->SetChannel( m_InputChannel );
 
-	m_10sFreqInterface.reset( new AnalyzerSettingInterfaceInteger() );
+	m_10sFreqInterface = new AnalyzerSettingInterfaceInteger();
 	m_10sFreqInterface->SetTitleAndTooltip( "10s Frequency (hz)",  "Specify the frequency in hz." );
 	m_10sFreqInterface->SetInteger( m_10sFreq );
 
-	m_1sFreqInterface.reset( new AnalyzerSettingInterfaceInteger() );
+	m_1sFreqInterface = new AnalyzerSettingInterfaceInteger();
 	m_1sFreqInterface->SetTitleAndTooltip( "1s Frequency (hz)",  "Specify the frequency in hz." );
 	m_1sFreqInterface->SetInteger( m_1sFreq );
 
-	m_Padding1Interface.reset( new AnalyzerSettingInterfaceInteger() );
+	m_Padding1Interface = new AnalyzerSettingInterfaceInteger();
 	m_Padding1Interface->SetTitleAndTooltip( "Padding Between 10s and 1s Digit (ms)",  "Specify the padding in ms." );
 	m_Padding1Interface->SetInteger( m_Padding1 );
 
-	m_Padding2Interface.reset( new AnalyzerSettingInterfaceInteger() );
+	m_Padding2Interface = new AnalyzerSettingInterfaceInteger();
 	m_Padding2Interface->SetTitleAndTooltip( "Padding Between 1s and 10s Digit (ms)",  "Specify the padding in ms." );
 	m_Padding2Interface->SetInteger( m_Padding2 );
 
-	AddInterface( m_InputChannelInterface.get() );
-	AddInterface( m_10sFreqInterface.get() );
-	AddInterface( m_Padding1Interface.get() );
-	AddInterface( m_1sFreqInterface.get() );
-	AddInterface( m_Padding2Interface.get() );
+	AddInterface( m_InputChannelInterface );
+	AddInterface( m_10sFreqInterface );
+	AddInterface( m_Padding1Interface );
+	AddInterface( m_1sFreqInterface );
+	AddInterface( m_Padding2Interface );
 
 	AddExportOption( 0, "Export as text/csv file" );
 	AddExportExtension( 0, "text", "txt" );
@@ -45,6 +45,11 @@ SystemErrorAnalyzerSettings::SystemErrorAnalyzerSettings()
 
 SystemErrorAnalyzerSettings::~SystemErrorAnalyzerSettings()
 {
+    delete m_InputChannelInterface;
+    delete m_10sFreqInterface;
+    delete m_Padding1Interface;
+    delete m_1sFreqInterface;
+    delete m_Padding2Interface;
 }
 
 bool SystemErrorAnalyzerSettings::SetSettingsFromInterfaces()
