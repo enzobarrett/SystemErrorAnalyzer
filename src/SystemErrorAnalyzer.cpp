@@ -50,7 +50,7 @@ void SystemErrorAnalyzer::WorkerThread()
     bool reset_starting_sample = false;
 
     // how much error should we tolerate?
-    int margin_of_error = 10'000'000;
+    int margin_of_error = 10000000;
 
 	for( ; ; )
     {
