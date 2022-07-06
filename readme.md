@@ -1,6 +1,6 @@
 # System Error Analyzer 
 
-- [](#)
+- [System Error Analyzer](#system-error-analyzer)
     - [Downloading](#downloading)
     - [Using downloaded analyzer binaries on MacOS](#using-downloaded-analyzer-binaries-on-macos)
   - [Prerequisites](#prerequisites)
