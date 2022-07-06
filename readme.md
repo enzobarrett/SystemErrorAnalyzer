@@ -17,7 +17,7 @@
     - [MacOS](#macos-2)
     - [Linux](#linux-2)
 
-This analyzer helps identify error codes on a low level heartbeat/error line. It's able to identify pulses that diviate significantly dye to the inacuracy of pulsing low level error codes. Configure by taking a guess on your own timings and entering them into the settings page. 
+This analyzer helps identify error codes on a low level heartbeat/error line. It's able to identify pulses that diviate significantly due to the inacuracy of pulsing low level error codes. Configure by taking a guess on your own timings and entering them into the settings page. 
 
 ![](output.png)
 ![](settings_page.png)
