@@ -1,6 +1,6 @@
-# Saleae Analyzer SDK Sample Analyzer
+# System Error Analyzer 
 
-- [Saleae Analyzer SDK Sample Analyzer](#saleae-analyzer-sdk-sample-analyzer)
+- [](#)
     - [Downloading](#downloading)
     - [Using downloaded analyzer binaries on MacOS](#using-downloaded-analyzer-binaries-on-macos)
   - [Prerequisites](#prerequisites)
