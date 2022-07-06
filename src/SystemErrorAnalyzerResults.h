@@ -22,8 +22,8 @@ public:
 protected: //functions
 
 protected:  //vars
-	SystemErrorAnalyzerSettings* mSettings;
-	SystemErrorAnalyzer* mAnalyzer;
+	SystemErrorAnalyzerSettings* m_Settings;
+	SystemErrorAnalyzer* m_Analyzer;
 };
 
 #endif //SYSTEMERROR_ANALYZER_RESULTS

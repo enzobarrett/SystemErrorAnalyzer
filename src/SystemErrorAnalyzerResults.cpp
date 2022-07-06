@@ -7,8 +7,8 @@
 
 SystemErrorAnalyzerResults::SystemErrorAnalyzerResults( SystemErrorAnalyzer* analyzer, SystemErrorAnalyzerSettings* settings )
 :	AnalyzerResults(),
-	mSettings( settings ),
-	mAnalyzer( analyzer )
+	m_Settings( settings ),
+	m_Analyzer( analyzer )
 {
 }
 
@@ -22,7 +22,7 @@ void SystemErrorAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& c
 	Frame frame = GetFrame( frame_index );
 
 	char number_str[128];
-	AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
+	AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 32, number_str, 128 );
 	AddResultString( number_str );
 }
 
@@ -30,8 +30,8 @@ void SystemErrorAnalyzerResults::GenerateExportFile( const char* file, DisplayBa
 {
 	std::ofstream file_stream( file, std::ios::out );
 
-	U64 trigger_sample = mAnalyzer->GetTriggerSample();
-	U32 sample_rate = mAnalyzer->GetSampleRate();
+	U64 trigger_sample = m_Analyzer->GetTriggerSample();
+	U32 sample_rate = m_Analyzer->GetSampleRate();
 
 	file_stream << "Time [s],Value" << std::endl;
 
@@ -44,7 +44,7 @@ void SystemErrorAnalyzerResults::GenerateExportFile( const char* file, DisplayBa
 		AnalyzerHelpers::GetTimeString( frame.mStartingSampleInclusive, trigger_sample, sample_rate, time_str, 128 );
 
 		char number_str[128];
-		AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
+		AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 32, number_str, 128 );
 
 		file_stream << time_str << "," << number_str << std::endl;
 
@@ -65,7 +65,7 @@ void SystemErrorAnalyzerResults::GenerateFrameTabularText( U64 frame_index, Disp
 	ClearTabularText();
 
 	char number_str[128];
-	AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
+	AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 32, number_str, 128 );
 	AddTabularText( number_str );
 #endif
 }
