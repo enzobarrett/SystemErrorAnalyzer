@@ -1,114 +1,153 @@
 #include "SystemErrorAnalyzer.h"
 #include "SystemErrorAnalyzerSettings.h"
 #include <AnalyzerChannelData.h>
+#include <iostream>
+#include <cmath>
 
 SystemErrorAnalyzer::SystemErrorAnalyzer()
 :	Analyzer2(),  
-	mSettings( new SystemErrorAnalyzerSettings() ),
-	mSimulationInitilized( false )
+	m_Settings( new SystemErrorAnalyzerSettings() ),
+	m_SimulationInitialized( false )
 {
-	SetAnalyzerSettings( mSettings.get() );
+	SetAnalyzerSettings( m_Settings );
 }
 
 SystemErrorAnalyzer::~SystemErrorAnalyzer()
 {
+    delete m_Settings;
+    delete m_Results;
 	KillThread();
 }
 
 void SystemErrorAnalyzer::SetupResults()
 {
-	mResults.reset( new SystemErrorAnalyzerResults( this, mSettings.get() ) );
-	SetAnalyzerResults( mResults.get() );
-	mResults->AddChannelBubblesWillAppearOn( mSettings->m_InputChannel );
+	m_Results = new SystemErrorAnalyzerResults( this, m_Settings );
+	SetAnalyzerResults( m_Results );
+	m_Results->AddChannelBubblesWillAppearOn( m_Settings->m_InputChannel );
 }
 
 void SystemErrorAnalyzer::WorkerThread()
 {
-	mSampleRateHz = GetSampleRate();
+    m_SampleRateHz = GetSampleRate();
 
-	mSerial = GetAnalyzerChannelData( mSettings->m_InputChannel );
+	m_Serial = GetAnalyzerChannelData( m_Settings->m_InputChannel );
 
-	if( mSerial->GetBitState() == BIT_LOW )
-		mSerial->AdvanceToNextEdge();
+    m_Serial->AdvanceToNextEdge();
 
-	U32 samples_per_bit = mSampleRateHz / mSettings->m_10sFreq;
-	U32 samples_to_first_center_of_first_data_bit = U32( 1.5 * double( mSampleRateHz ) / double( mSettings->m_10sFreq ) );
+    U64 last_edge = m_Serial->GetSampleNumber();
+    U64 starting_sample = m_Serial->GetSampleNumber();
+
+    // expected space between pulses
+	U32 big_digit_space = (m_SampleRateHz / m_Settings->m_10sFreq) / 2;
+    U32 small_digit_space = (m_SampleRateHz / m_Settings->m_1sFreq) / 2;
+    U32 padding_1_space = static_cast<U32>(m_SampleRateHz * (m_Settings->m_Padding1 / 1000.0));
+    U32 padding_2_space = static_cast<U32>(m_SampleRateHz * (m_Settings->m_Padding2 / 1000.0));
+
+    int big_digit_count = 0;
+    int small_digit_count = 0;
+
+    // flag to reset starting sample
+    bool reset_starting_sample = false;
+
+    // how much error should we tolerate?
+    int margin_of_error = 10'000'000;
 
 	for( ; ; )
-	{
-		U8 data = 0;
-		U8 mask = 1 << 7;
-		
-		mSerial->AdvanceToNextEdge(); //falling edge -- beginning of the start bit
+    {
+        m_Serial->AdvanceToNextEdge();
 
-		U64 starting_sample = mSerial->GetSampleNumber();
+        // how much time between last and current pulse?
+        U64 diff = m_Serial->GetSampleNumber() - last_edge;
+        last_edge = m_Serial->GetSampleNumber();
 
-		mSerial->Advance( samples_to_first_center_of_first_data_bit );
+        if (std::abs(static_cast<int>(diff - big_digit_space)) < margin_of_error) {
+            big_digit_count++;
+        }
+        if (std::abs(static_cast<int>(diff - small_digit_space)) < margin_of_error) {
+            small_digit_count++;
+        }
+        if(std::abs(static_cast<int>(diff - padding_1_space)) < margin_of_error) {
+            // our frame ends at the end off padding 2,
+            // so we do all our work there
+        }
+        if(std::abs(static_cast<int>(diff - padding_2_space)) < margin_of_error) {
+            // add a frame with the error code
+            Frame frame;
 
-		for( U32 i=0; i<8; i++ )
-		{
-			//let's put a dot exactly where we sample this bit:
-			mResults->AddMarker( mSerial->GetSampleNumber(), AnalyzerResults::Dot, mSettings->m_InputChannel );
+            // convert # of pulses -> number
+            int big_digit = static_cast<int>(std::ceil(big_digit_count / 2.0));
+            int small_digit = static_cast<int>(std::ceil(small_digit_count / 2.0));
 
-			if( mSerial->GetBitState() == BIT_HIGH )
-				data |= mask;
+            // combine into two digit error code
+            frame.mData1 = big_digit * 10 + small_digit;
 
-			mSerial->Advance( samples_per_bit );
-
-			mask = mask >> 1;
-		}
+            frame.mFlags = 0;
 
 
-		//we have a byte to save. 
-		Frame frame;
-		frame.mData1 = data;
-		frame.mFlags = 0;
-		frame.mStartingSampleInclusive = starting_sample;
-		frame.mEndingSampleInclusive = mSerial->GetSampleNumber();
+            // start at end of last padding 2
+            frame.mStartingSampleInclusive = starting_sample;
+            // end at beginning of this padding 2
+            frame.mEndingSampleInclusive = last_edge - padding_2_space;
 
-		mResults->AddFrame( frame );
-		mResults->CommitResults();
-		ReportProgress( frame.mEndingSampleInclusive );
-	}
+            // save our work
+            m_Results->AddFrame(frame);
+            m_Results->CommitResults();
+
+            // reset count
+            small_digit_count = 0;
+            big_digit_count = 0;
+
+            // set flag
+            reset_starting_sample = true;
+        }
+
+        if (reset_starting_sample) {
+            starting_sample = last_edge;
+            reset_starting_sample = false;
+        }
+
+        ReportProgress( m_Serial->GetSampleNumber() );
+    }
 }
 
 bool SystemErrorAnalyzer::NeedsRerun()
 {
-	return false;
+    return false;
 }
 
-U32 SystemErrorAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate, SimulationChannelDescriptor** simulation_channels )
+U32 SystemErrorAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate,
+                                                 SimulationChannelDescriptor** simulation_channels )
 {
-	if( mSimulationInitilized == false )
-	{
-		mSimulationDataGenerator.Initialize( GetSimulationSampleRate(), mSettings.get() );
-		mSimulationInitilized = true;
-	}
+    if( m_SimulationInitialized == false )
+    {
+        m_SimulationDataGenerator.Initialize( GetSimulationSampleRate(), m_Settings );
+        m_SimulationInitialized = true;
+    }
 
-	return mSimulationDataGenerator.GenerateSimulationData( minimum_sample_index, device_sample_rate, simulation_channels );
+    return m_SimulationDataGenerator.GenerateSimulationData( minimum_sample_index, device_sample_rate, simulation_channels );
 }
 
 U32 SystemErrorAnalyzer::GetMinimumSampleRateHz()
 {
-	return mSettings->m_10sFreq * 4;
+    return 25000; // TODO: look into this
 }
 
 const char* SystemErrorAnalyzer::GetAnalyzerName() const
 {
-	return "System Error Analyzer";
+    return "System Error Analyzer";
 }
 
 const char* GetAnalyzerName()
 {
-	return "System Error Analyzer";
+    return "System Error Analyzer";
 }
 
 Analyzer* CreateAnalyzer()
 {
-	return new SystemErrorAnalyzer();
+    return new SystemErrorAnalyzer();
 }
 
 void DestroyAnalyzer( Analyzer* analyzer )
 {
-	delete analyzer;
+    // TODO: implement fix for when we call delete here
 }
