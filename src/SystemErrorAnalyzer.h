@@ -5,6 +5,8 @@
 #include "SystemErrorAnalyzerResults.h"
 #include "SystemErrorSimulationDataGenerator.h"
 
+#pragma warning(disable: 4251)
+
 class SystemErrorAnalyzerSettings;
 class ANALYZER_EXPORT SystemErrorAnalyzer : public Analyzer2
 {
@@ -21,18 +23,18 @@ public:
 	virtual const char* GetAnalyzerName() const;
 	virtual bool NeedsRerun();
 
-protected: //vars
-	std::auto_ptr< SystemErrorAnalyzerSettings > mSettings;
-	std::auto_ptr< SystemErrorAnalyzerResults > mResults;
-	AnalyzerChannelData* mSerial;
+private: //vars
+	SystemErrorAnalyzerSettings* m_Settings;
+	SystemErrorAnalyzerResults* m_Results;
+	AnalyzerChannelData* m_Serial;
 
-	SystemErrorSimulationDataGenerator mSimulationDataGenerator;
-	bool mSimulationInitilized;
+	SystemErrorSimulationDataGenerator m_SimulationDataGenerator;
+	bool m_SimulationInitialized;
 
 	//Serial analysis vars:
-	U32 mSampleRateHz;
-	U32 mStartOfStopBitOffset;
-	U32 mEndOfStopBitOffset;
+	U32 m_SampleRateHz;
+	U32 m_StartOfStopBitOffset;
+	U32 m_EndOfStopBitOffset;
 };
 
 extern "C" ANALYZER_EXPORT const char* __cdecl GetAnalyzerName();
