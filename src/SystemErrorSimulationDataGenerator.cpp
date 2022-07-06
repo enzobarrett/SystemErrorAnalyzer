@@ -11,7 +11,7 @@ void SystemErrorSimulationDataGenerator::Initialize( U32 simulation_sample_rate,
 {
 	m_SimulationSampleRateHz = simulation_sample_rate;
 	m_Settings = settings;
-    m_ErrorCode = 42; // InvalidController
+    m_ErrorCode = 64; // InvalidController
     m_Clock = ClockGenerator();
 
 	m_SerialSimulationData.SetChannel( m_Settings->m_InputChannel );
@@ -49,7 +49,7 @@ void SystemErrorSimulationDataGenerator::CreatePeriod()
 
 void SystemErrorSimulationDataGenerator::PulseDigit(int digit, int freq) {
     // init clock
-    m_Clock.Init(freq, m_SimulationSampleRateHz);
+    m_Clock.Init(freq*2, m_SimulationSampleRateHz);
 
     // loop through the digit and pulse
     for (int i = 0; i < digit; ++i) {
@@ -62,7 +62,8 @@ void SystemErrorSimulationDataGenerator::PulseDigit(int digit, int freq) {
         // high again
         m_SerialSimulationData.TransitionIfNeeded( BIT_HIGH );
 
-        // advance half period
-        m_SerialSimulationData.Advance(m_Clock.AdvanceByHalfPeriod());
+        if (i < digit - 1)
+            // advance half period
+            m_SerialSimulationData.Advance(m_Clock.AdvanceByHalfPeriod());
     }
 }
