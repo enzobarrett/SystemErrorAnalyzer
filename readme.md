@@ -1,13 +1,13 @@
 # Saleae Analyzer SDK Sample Analyzer
 
 - [Saleae Analyzer SDK Sample Analyzer](#saleae-analyzer-sdk-sample-analyzer)
-  - [Renaming your Analyzer](#renaming-your-analyzer)
-  - [Cloud Building & Publishing](#cloud-building---publishing)
+    - [Downloading](#downloading)
+    - [Using downloaded analyzer binaries on MacOS](#using-downloaded-analyzer-binaries-on-macos)
   - [Prerequisites](#prerequisites)
     - [Windows](#windows)
     - [MacOS](#macos)
     - [Linux](#linux)
-  - [Building your Analyzer](#building-your-analyzer)
+  - [Building](#building)
     - [Windows](#windows-1)
     - [MacOS](#macos-1)
     - [Linux](#linux-1)
@@ -16,42 +16,18 @@
     - [Windows](#windows-2)
     - [MacOS](#macos-2)
     - [Linux](#linux-2)
-  - [Updating an Existing Analyzer to use CMake & GitHub Actions](#updating-an-existing-analyzer-to-use-cmake---github-actions)
 
-The Saleae Analyzer SDK is used to create Low Level Analyzers (LLA) for the Saleae Logic software via a plugin architecture. These plugins are used to decode protocol data from captured waveforms. In many cases you can use a [High Level Analyzer Extension](https://support.saleae.com/extensions/high-level-analyzer-quickstart) to process data from an existing protocol decoder instead of building a LLA.
+This analyzer helps identify error codes on a low level heartbeat/error line. It's able to identify pulses that diviate significantly dye to the inacuracy of pulsing low level error codes. Configure by taking a guess on your own timings and entering them into the settings page. 
 
-To build your own protocol decoder plugin, first fork, clone, or download this repository.
+![](output.png)
+![](settings_page.png)
 
-Then, make sure you have the required software installed for development. See the [Prerequisites](#Prerequisites) section below for details.
+### Downloading
 
-## Renaming your Analyzer
+Go to the github [releases](https://github.com/enzobarrett/SystemErrorAnalyzer/releases/) page and download the appropriate zip file for your platform. Install by selecting a low level analyzer directory in logic's prefrences, and copy the downloaded binary into the folder.
 
-Once downloaded, first run the script rename_analyzer.py. This script is used to rename the sample analyzer automatically. Specifically, it changes the class names in the source code, it changes the text name that will be displayed once the custom analyzer has been loaded into the Saleae Logic software, and it updates the visual studio project.
+![](logic_settings.png)
 
-There are two names you need to provide to rename_analyzer. The first is the class name. For instance, if you are developing a SPI analyzer, the class names would be SPIAnalyzer, SPIAnalyzerResults, SPIAnalyzerSettings, etc.
-The file names would be similar, like SPIAnalyzer.cpp, etc.
-
-All analyzer classes should end with "Analyzer," so the rename script will add that for you. In the first prompt after starting the script, enter "SPI". The analyzer suffix will be added for you. This needs to be a valid C++ class name - no spaces, it can't start with a number, etc.
-
-Second, the script will prompt you for the display name. This will appear in the software in the list of analyzers after the plugin has loaded. This string can have spaces, since it will always be treated as a string, and not as the name of a class.
-
-After that, the script will complete the renaming process and exit.
-
-    python rename_analyzer.py
-    SPI
-    Mark's SPI Analyzer
-
-Once renamed, you're ready to build your analyzer! See the [Building your Analyzer](#Building-your-Analyzer) section below.
-
-API documentation can be found in [docs/Analyzer_API.md](docs/Analyzer_API.md).
-
-## Cloud Building & Publishing
-
-This example repository includes support for GitHub actions, which is a continuous integration service from GitHub. The file located at `.github\workflows\build.yml` contains the configuration.
-
-When building in CI, the release version of the analyzer is built for Windows, Linux, and MacOS. The built analyzer files are available for every CI build. Additionally, GitHub releases are automatically created for any tagged commits, making it easy to share pre-built binaries with others once your analyzer is complete.
-
-Learn how to tag a commit here: https://stackoverflow.com/questions/18216991/create-a-tag-in-a-github-repository
 
 ### Using downloaded analyzer binaries on MacOS
 
@@ -152,7 +128,7 @@ Misc dependencies:
 sudo apt-get install build-essential
 ```
 
-## Building your Analyzer
+## Building
 
 ### Windows
 
@@ -283,19 +259,3 @@ To verify that symbols for your custom analyzer are loading, check the backtrace
 #4  0x00007f26828e1609 in start_thread (arg=<optimized out>) at pthread_create.c:477
 #5  0x00007f2681136293 in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:95
 ```
-
-## Updating an Existing Analyzer to use CMake & GitHub Actions
-
-If you maintain an existing C++ analyzer, or wish to fork and update someone else's analyzer, please follow these steps.
-
-1. Delete the contents of the existing repository, except for the source directory, and the readme.
-2. Copy the contents of this sample repository into the existing analyzer, except for the src and docs directories, or the rename_analyzer.py script. The `.clang-format` file is optional, it would allow you to auto-format your code to our style using [clang-format](https://clang.llvm.org/docs/ClangFormat.html).
-3. Rename the existing source directory to src. This is optional, but it might make future updates from this sample analyzer easier to roll out. Make sure the CMakeLists.txt file reflects your source path.
-4. In the new CMakeLists.txt file, make the following changes:
-
-- In the line `project(SimpleSerialAnalyzer)`, replace `SimpleSerialAnalyzer` with the name of the existing analyzer, for example `project(I2CAnalyzer)`
-- In the section `set(SOURCES`, replace all of the existing source code file names with the file names of the existing source code.
-
-5. Update the readme! Feel free to just reference the SampleAnalyzer repository, or copy over the build instructions.
-6. Try the build instructions to make sure the analyzer still builds, or commit this to GitHub to have GitHub actions build it for you!
-7. Once you're ready to create a release, add a tag to your last commit to trigger GitHub to publish a release.
